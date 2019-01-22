@@ -19,6 +19,12 @@ In the main window, choose either "clarify database" to obtain this
 beautiful usable database. Or choose "rebuild database" in order to
 port your change from the clear database to anki database.
 
+You'll obtain a sqlite database in the add-on folder. If you don't
+know how to access this folder, open the add-on manager, select this
+add-on and click on "View files".
+
+Hopefull it's table will be self explanatory.
+
 ## Warning
 Make a backup before using it. It should not create problem, but you
 never know.
