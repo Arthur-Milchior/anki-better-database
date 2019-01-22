@@ -18,6 +18,10 @@ class Data:
         self.end = end
         Data.tables.append(self)
 
+    def delete_query(self):
+        query = f"DELETE table if exists {self.name}"
+        return query
+
     def create_query(self):
         query = f"CREATE table if not EXISTS {self.name}  ("
         first = True
@@ -51,6 +55,9 @@ class Data:
     def create(self):
         db.execute(self.create_query())
 
+    def delete(self):
+        db.execute(self.delete_query())
+
     def insert(self):
         rows = self.getRows()
         try:
@@ -63,6 +70,7 @@ class Data:
             raise
 
     def execute(self):
+        self.delete()
         self.create()
         self.insert()
         db.commit()
