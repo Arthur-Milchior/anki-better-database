@@ -19,7 +19,8 @@ class Data:
         Data.tables.append(self)
 
     def delete_query(self):
-        query = f"DELETE table if exists {self.name}"
+        query = f"DROP table if exists {self.name}"
+        print(query)
         return query
 
     def create_query(self):
