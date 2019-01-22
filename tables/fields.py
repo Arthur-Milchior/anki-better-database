@@ -1,5 +1,6 @@
 from aqt import mw
-import .fieldnames
+from .fieldnames import data
+
 name= "fields"
 column=[("nid", "INTEGER REFERENCES notes (id) ON DELETE CASCADE  ON UPDATE CASCADE"),
         ("name", "TEXT    REFERENCES fieldnames (name)"),
@@ -7,7 +8,7 @@ column=[("nid", "INTEGER REFERENCES notes (id) ON DELETE CASCADE  ON UPDATE CASC
 ]
 
 end = """ UNIQUE (
-        ord,
+        name,
         nid
     )"""
 
@@ -18,9 +19,9 @@ def getRows():
         mid = note.mid
         model = mw.col.models.get(mid)
         fieldNames = mw.col.models.fieldNames(model)
-        for ord in len(note.fields):
+        for ord in range(len(note.fields)):
             value = note.fields[ord]
             name = fieldNames[ord]
             yield (nid,name, value)
-from meta import Data
-Data(name, column, getRows,end)
+from ..meta import Data
+data = Data(name, column, getRows,end)

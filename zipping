@@ -1,0 +1,1 @@
+zip db.zip *py README.md LICENSE config* zipping

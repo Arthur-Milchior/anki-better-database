@@ -1,4 +1,5 @@
 from aqt import mw
+import json
 
 name= "fieldnames"
 column=[
@@ -18,12 +19,19 @@ end = """ UNIQUE (
     )"""
 
 def getRows():
-    execute(create_query)
     col = mw.col
     models = col.models.models
-    for model in models:
+    for model in models.values():
         modelId = model["id"]
         for field in model["flds"]:
-            yeld (field["name"], int(field["ord"]), modelId, field["font"], field["media"], field["rtl"], field["sticky"], field["size"])
-from meta import Data
-Data(name, column, getRows, end)
+            yield (
+                field["name"],
+                int(field["ord"]),
+                modelId,
+                field["font"],
+                json.dumps(field["media"]),
+                field["rtl"],
+                field["sticky"],
+                field["size"])
+from ..meta import Data
+data = Data(name, column, getRows, end)
