@@ -1,45 +1,48 @@
+from ..db import *
 import json
 from aqt import mw
 name="configurations"
 
-fields = ([
-    ("json", "TEXT"),
-    ("name", "text UNIQUE"),
-    ("maxTaken","int"),
-    ("timer","BOOLEAN"),
-    ("autoplay","BOOLEAN"),
-    ("replayq","BOOLEAN"),
-    ("mod","int"),
-    ("usn","int"),
-    ("dyn","BOOLEAN"),
-    ("id", "int UNIQUE PRIMARY KEY")
+columns = ([
+    Column(name="json", type="TEXT")
+    Column(name="name", type="text", unique= True),
+    Column(name="maxTaken",type="int"),
+    Column(name="timer",type="BOOLEAN"),
+    Column(name="autoplay",type="BOOLEAN"),
+    Column(name="replayq",type="BOOLEAN"),
+    Column(name="mod",type="int"),
+    Column(name="usn",type="int"),
+    Column(name="dyn",type="BOOLEAN"),
+    Column(name="id", type="int", primary=True)
 ]+
           [
               "new_delays",
               "ints",
-              ("initial_factor","NUMERIC"),
+              Column(name="initial_factor",type="NUMERIC"),
               "separate",
-              ("random","BOOLEAN"),
-              ("new_perDay","int"),
-              ("new_bury","BOOLEAN"),
+              Column(name="random",type="BOOLEAN"),
+              Column(name="new_perDay",type="int"),
+              Column(name="new_bury",type="BOOLEAN"),
           ]+
           [
               "lapse_delays",
-              ("mult","NUMERIC"),
-              ("minInt","NUMERIC"),
-              ("leechFails","INT"),
-              ("leechSuspend","BOOLEAN"),
+              Column(name="mult",type="NUMERIC"),
+              Column(name="minInt",type="NUMERIC"),
+              Column(name="leechFails",type="INT"),
+              Column(name="leechSuspend",type="BOOLEAN"),
           ]+
           [
               "review_perDay",
-              ("ease4","NUMERIC"),
-              ("fuzz","NUMERIC"),
+              Column(name="ease4",type="NUMERIC"),
+              Column(name="fuzz",type="NUMERIC"),
               "minSpace",
-              ("ivlFct","NUMERIC"),
-              ("maxIvl","NUMERIC"),
-              ("review_bury","BOOLEAN"),
+              Column(name="ivlFct",type="NUMERIC"),
+              Column(name="maxIvl",type="NUMERIC"),
+              Column(name="review_bury",type="BOOLEAN"),
      ]
      )
+
+table = Table(name, columns)
 
 def getRows():
     col = mw.col
@@ -78,4 +81,4 @@ def getRows():
             configuration["rev"]["bury"],
            )
 from ..meta import Data
-data = Data(name, fields, getRows)
+data = Data(name, columns, getRows)

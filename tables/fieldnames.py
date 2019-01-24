@@ -1,22 +1,20 @@
+from ..db import *
 from aqt import mw
 import json
 
 name= "fieldnames"
 column=[
-    ("name" ,  "TEXT"),
-    ("ord"   , "INT"),
-    ("mid"    ,"INT"),
-    ("font"   ,"TEXT"),
-    ("media"),
-    ("rtl"),
-    ("sticky" ,"BOOLEAN"),
-    ("size"   ,"INTEGER"),
+    Column(name="name", type="TEXT"),
+    Column(name="ord", type="INT"),
+    Column(name="mid", type="INT"),
+    Column(name="font", type="TEXT"),
+    Column(name="media"),
+    Column(name="rtl"),
+    Column(name="sticky",type="BOOLEAN"),
+    Column(name="size",type="INTEGER"),
 ]
 
-end = """ UNIQUE (
-        ord,
-        mid
-    )"""
+table = Table(name, columns, ["ord","mid"])
 
 def getRows():
     col = mw.col

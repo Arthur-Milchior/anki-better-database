@@ -1,16 +1,15 @@
 from aqt import mw
 from .fieldnames import data
+from ..db import *
 
 name= "fields"
-column=[("nid", "INTEGER REFERENCES notes (id) ON DELETE CASCADE  ON UPDATE CASCADE"),
-        ("name", "TEXT    REFERENCES fieldnames (name)"),
-        ("value","TEXT")
+column=[
+    Column(name="nid", type="INTEGER", reference= Reference(table="notes", column="id", delete=cascade, update= cascade)),
+    Column(name="name", type="TEXT", references= Reference(column= "fieldnames", column="name", delete= CASCADE, update= cascade)),
+    Column(name="value",type="TEXT")
 ]
 
-end = """ UNIQUE (
-        name,
-        nid
-    )"""
+table = Table(name, columns, ["name","nid"])
 
 def getRows():
     nids = mw.col.findNotes("")

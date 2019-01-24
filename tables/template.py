@@ -1,3 +1,4 @@
+from ..db import *
 from aqt import mw
 from .models  import data
 from .decks import data
@@ -5,21 +6,18 @@ import sys
 import json
 
 name= "template"
-fields = [
-    ("json", "TEXT"),
-    ("mid","INTEGER REFERENCES models (id) ON DELETE CASCADE"),
-    ("ord","int"),
-    ("afmt","Text"),
-    ("bafmt","Text"),
-    ("qfmt","Text"),
-    ("bqfmt","Text"),
-    ("did","INTEGER REFERENCES decks (id) ON DELETE SET NULL "),
-    ("name","Text"),
+columns = [
+    Column(name="json", type="TEXT"),
+    Column(name="mid",type="INTEGER", reference= Reference("models", "id",  delete = cascade)),
+    Column(name="ord",type="int"),
+    Column(name="afmt",type="Text"),
+    Column(name="bafmt",type="Text"),
+    Column(name="qfmt",type="Text"),
+    Column(name="bqfmt",type="Text"),
+    Column(name="did",type="INTEGER", reference= Reference("models", "id",  delete = setNull)),
+    Column(name="name",type="Text"),
 ]
-end = """ UNIQUE (
-        ord,
-        mid
-    )"""
+table = Table(name, columns, ["ord","mid"])
 
 
 def getRows():

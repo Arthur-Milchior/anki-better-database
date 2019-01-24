@@ -1,0 +1,11 @@
+{
+  "tables":
+  ["configurations",
+   "decks",
+   "fieldnames",
+   "fields",
+   "models",
+   "tags",
+   "template"
+  ]
+}

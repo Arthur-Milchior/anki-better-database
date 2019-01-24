@@ -1,24 +1,27 @@
+from ..db import *
 from aqt import mw
 from .decks import data
 import json
+
 name= "models"
-column=[
-    ("json", "TEXT"),
-    ("css","Text"),
-    ("did","INTEGER REFERENCES decks (id) ON DELETE SET NULL"),
-    ("id","INTEGER UNIQUE PRIMARY KEY"),
-    ("latexPost","Text"),
-    ("latexPre","Text"),
-    ("mod","int"),
-    ("name","Text"),
-    ("req","TEXT"),
-    ("sortf","int"),
-    ("tags","TEXT"),
+columns=[
+    Column(name="json", type="TEXT"),
+    Column(name="css",type="Text"),
+    Column(name="did",type="INTEGER", references= Reference(column="decks", table="id", delete= setNull)),
+    Column(name="id",type="INTEGER", primary=TRUE),
+    Column(name="latexPost",type="Text"),
+    Column(name="latexPre",type="Text"),
+    Column(name="mod",type="int"),
+    Column(name="name",type="Text"),
+    Column(name="req",type="TEXT"),
+    Column(name="sortf",type="int"),
+    Column(name="tags",type="TEXT"),
     "nb_tmpls",
-    ("cloze","BOOLEAN"),
-    ("usn","INT"),
-    ("vers","TEXT"),
+    Column(name="cloze",type="BOOLEAN"),
+    Column(name="usn",type="INT"),
+    Column(name="vers",type="TEXT"),
 ]
+table = Table(name, columns)
 
 
 def getRows():

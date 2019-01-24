@@ -1,9 +1,10 @@
+from ..db import *
 import json
 from aqt import mw
 name="decks"
 
 columns = [
-    ("json", "TEXT"),
+    Column(name="json", type="TEXT"),
     "newToday",
     "revToday",
     "lrnToday",
@@ -12,15 +13,16 @@ columns = [
     "usn",
     "descr",# r added, because desc means descending
     "dyn",
-    ("collapsed",        "BOOLEAN"),
-    ("extendNew" ,       "INTEGER"),
-    ("extendRev"  ,      "INTEGER"),
-    ("name",             "TEXT    UNIQUE"),
-    ("browserCollapsed", "BOOLEAN"),
-    ("id",               "INTEGER UNIQUE  PRIMARY KEY"),
-    ("mod",              "INTEGER"),
+    Column(name="collapsed", type="BOOLEAN"),
+    Column(name="extendNew", type="INTEGER"),
+    Column(name="extendRev", type="INTEGER"),
+    Column(name="name", type="TEXT",unique=True),
+    Column(name="browserCollapsed", type="BOOLEAN"),
+    Column(name="id", type="INTEGER", PRIMARY=TRUE),
+    Column(name="mod", type="INTEGER")
 ]
 
+table = Table(name, columns)
 
 def getRows():
     col = mw.col

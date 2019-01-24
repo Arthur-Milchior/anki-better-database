@@ -1,13 +1,12 @@
 from aqt import mw
+from ..db import *
 
 name= "tags"
-columns = [("nid", "INTEGER REFERENCES notes (id) ON DELETE CASCADE  ON UPDATE CASCADE"),
-   ("tag", "TEXT"),
+columns = [
+    Column(name="nid", type="INTEGER", references= Reference(table="notes", column="id", delete=cascade, update= cascade)),
+    Column(name="tag", type="TEXT"),
 ]
-end = """ UNIQUE (
-        tag,
-        nid
-    )"""
+table = Table(name, columns, ["tag","nid"])
 
 def getRows():
     nids = mw.col.findNotes("")
