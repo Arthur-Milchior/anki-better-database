@@ -22,6 +22,32 @@ columns = [
     Column(name="mod", type="INTEGER")
 ]
 
+def oneLine(line):
+    json, newToday, revToday, lrnToday, timeToday, conf, usn, descr, dyn, collapsed, extendNew, extendRev, name, browserCollapsed, id, mod = line
+    deck = dict(
+        newToday = json.loads(newToday),
+        revToday = json.loads(revToday),
+        lrnToday = json.loads(lrnToday),
+        timeToday = json.loads(timeToday),
+        usn = usn,
+        desc = desc,
+        dyn = dyn,
+        collapsed = collapsed,
+        name = name,
+        id = id,
+        mod = mod
+        )
+    if conf is not None:
+        deck["conf"] = conf
+    if extendNew is not None:
+        deck["extendNew"] = extendNew
+    if extendRev is not None:
+        deck["extendRev"] = extendRev
+    if browserCollapsed is not None:
+        deck["browserCollapsed"] = browserCollapsed
+    return deck
+
+
 table = Table(name, columns)
 
 def getRows():

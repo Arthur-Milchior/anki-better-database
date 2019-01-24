@@ -4,12 +4,19 @@ from ..db import *
 
 name= "fields"
 column=[
-    Column(name="nid", type="INTEGER", reference= Reference(table="notes", column="id", delete=cascade, update= cascade)),
+    Column(name="nid", type="INTEGER"#, reference= Reference(table="notes", column="id", delete=cascade, update= cascade)
+    ),
     Column(name="name", type="TEXT", references= Reference(column= "fieldnames", column="name", delete= CASCADE, update= cascade)),
     Column(name="value",type="TEXT")
 ]
 
 table = Table(name, columns, ["name","nid"])
+# def oneLine(line):
+#     nid, name, value = line
+#     return dict(
+#         name = name,
+#         value = value),nid
+
 
 def getRows():
     nids = mw.col.findNotes("")

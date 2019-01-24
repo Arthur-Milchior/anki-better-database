@@ -60,6 +60,7 @@ def getRows():
             configuration["usn"],
             configuration["dyn"],
             configuration["id"],
+
             json.dumps(configuration["new"]["delays"]),
             json.dumps(configuration["new"]["ints"]),
             configuration["new"]["initialFactor"],
@@ -67,11 +68,13 @@ def getRows():
             int(configuration["new"]["order"])==0,
             configuration["new"]["perDay"],
             configuration["new"]["bury"],
+
             json.dumps(configuration["lapse"]["delays"]),
             configuration["lapse"]["mult"],
             configuration["lapse"]["minInt"],
             configuration["lapse"]["leechFails"],
             int(configuration["lapse"]["leechAction"])==0,
+
             json.dumps(configuration["rev"]["perDay"]),
             configuration["rev"]["ease4"],
             configuration["rev"]["fuzz"],
@@ -80,5 +83,48 @@ def getRows():
             configuration["rev"]["maxIvl"],
             configuration["rev"]["bury"],
            )
+
+def oneLine(line):
+    json, name, maxTaken, timer, autoPlay, replayQ, mod, usn, dyn, id, new_delay, ints, initialFactor, separate, random, new_perDay, new_bury, lapse_delays, mult, minInt, leechFails, leechSuspend, review_perDay, ease4, fuzz, minSpace, ivlFct, maxIvl, review_bury = line
+    new = dict(
+        delays = delays,
+        ints = ints,
+        initialFactor = initialFactor,
+        separate = separate,
+        order = 0 if random else 1,
+        perDay = new_perDay,
+    bury = bury)
+    lapse = dict(
+        delays = json.loads(delays),
+        mult = mult,
+        minInt = minInt,
+        leechFails = leechFails,
+        leechAction = 0 if leechSuspend else 1
+    )
+    rev = dict(
+        perdDay = json.loads(review_perDay),
+        ease4 = ease4,
+        fuzz = fuzz,
+        minSpace = minSpace,
+        ivlFct = ivlFct,
+        maxIvl = maxIvl,
+        bury = bury
+    )
+    conf = dict(
+        name = name,
+        maxTaken = maxTaken,
+        timer = 1 if timer else 0,
+        autoplay = autoplay,
+        replayQ = replayQ,
+        mod = mod,
+        usn = usn,
+        dyn = dyn,
+        id = id,
+        new = new,
+        lapse = lapse,
+        rev = rev
+    )
+    return conf
+
 from ..meta import Data
-data = Data(name, columns, getRows)
+data = Data(table, getRows)

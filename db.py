@@ -1,9 +1,11 @@
 from aqt import mw
 from anki.db import DB
 import os
+from .config import considerTable, getDb, isTableInSameDb
+
 path = os.path.dirname(os.path.abspath(__file__))
 name = mw.pm.name
-db = DB(f"{path}/clearer.{name}.sqlite3")
+
 
 
 class Reference:
@@ -16,6 +18,8 @@ class Reference:
         self.primary = primary
 
     def create(self):
+        if not considerTable(self.name):
+            return ""
         t = f"references {self.table} ({self.column})"
         if self.delete:
             t+= f" on delete {self.delete}"
@@ -102,7 +106,7 @@ class Table:
 
     def insert(self,rows):
         try:
-            db.executemany(self.insert_query(),rows)
+            getDb().executemany(self.insert_query(),rows)
         except:
             print(f"Rows are\n----------\n")
             for row in rows:
@@ -111,13 +115,30 @@ class Table:
             raise
 
     def create(self):
-        db.execute(self.create_query())
+        getDb().execute(self.create_query())
 
     def delete(self):
-        db.execute(self.delete_query())
+        getDb().execute(self.delete_query())
 
-    def execute(self, rows):
+    def execute(self, rows, checkConf = True):
+        if checkConf and not considerTable(self.name):
+            return
         self.delete()
         self.create()
         self.insert(rows)
-        db.commit()
+        getDb().commit()
+
+    def select_query(self):
+        t = "select ("
+        first = True
+        for colum in self.columns:
+            if first:
+                first = False
+            else:
+                t+=", "
+            t+=column.name
+        t+=f") from {self.name}"
+        return t
+
+    def select(self):
+        return getDb().all(self.select_query())

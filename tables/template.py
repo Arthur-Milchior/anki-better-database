@@ -19,6 +19,9 @@ columns = [
 ]
 table = Table(name, columns, ["ord","mid"])
 
+def oneLine(line):
+    json, mid, ord, afmt, bafmt, qfmt, bqfmt, did, name = line
+
 
 def getRows():
     models = mw.col.models.models

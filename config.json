@@ -1,11 +1,22 @@
 {
   "tables":
-  ["configurations",
-   "decks",
-   "fieldnames",
-   "fields",
-   "models",
-   "tags",
-   "template"
-  ]
+  {
+	"configurations":{
+	 "consider":true},
+	"decks":{
+	 "consider":true},
+	"fieldnames":{
+	 "consider":true},
+	"fields":{
+	 "consider":true},
+	"models":{
+	 "consider":true},
+	"tags":{
+	 "consider":true},
+	"template":{
+	 "consider":true}
+  },
+  "use anki's database":false,
+  "deletion":false,
+
 }
