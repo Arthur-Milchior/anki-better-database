@@ -1,26 +1,25 @@
 from ..db import *
 from aqt import mw
-from .models  import data
-from .decks import data
+from ..debug import *
 import sys
 import json
 
 name= "template"
 columns = [
     Column(name="json", type="TEXT"),
-    Column(name="mid",type="INTEGER", reference= Reference("models", "id",  delete = cascade)),
+    Column(name="model",type="text", reference= Reference("models", "name",  onDelete = cascade)),
     Column(name="ord",type="int"),
     Column(name="afmt",type="Text"),
     Column(name="bafmt",type="Text"),
     Column(name="qfmt",type="Text"),
     Column(name="bqfmt",type="Text"),
-    Column(name="did",type="INTEGER", reference= Reference("models", "id",  delete = setNull)),
+    Column(name="did",type="integer", reference= Reference("models", "id",  onDelete = setNull)),
     Column(name="name",type="Text"),
 ]
-table = Table(name, columns, ["ord","mid"], order = ["mid", "ord"])
+
 
 def oneLine(line):
-    json, mid, ord, afmt, bafmt, qfmt, bqfmt, did, name = line
+    json_, modelName, ord, afmt, bafmt, qfmt, bqfmt, did, name = line
     template = dict(
         ord = ord,
         afmt = afmt,
@@ -28,32 +27,41 @@ def oneLine(line):
         qfmt = qfmt,
         bqfmt = bqfmt,
         did = did,
-        name = nane,
+        name = name,
     )
-    return mid, ord, template
+    return modelName, ord, template
 
 def allLines(lines):
-    lastOrd = None
-    lastMid = None
-    lastModel = None
-    listTemplates = []
-    midOk = True
+    lastModelName = None
     for line in lines:
-        mid,ord,template = oneLine(line)
-        if lastMid == mid:
-            if not midOk:
+        debug(f"""
+------
+Considering line: «{line}»""")
+        modelName,ord,template = oneLine(line)
+        if lastModelName == modelName:
+            debug("Same modelName")
+            if not lastModelOk:
+                debug("not ok, thus continue")
                 continue
         else:
+            debug("New modelName")
+            listTemplates = []
             endModel(lastModel, listTemplates)
-            midOk = True
+            lastModelOk = True
             lastOrd = -1
-            lastMid = mid
-            lastModel = mw.col.models.get(mid)
+            lastModelName = modelName
+            lastModel = mw.col.models.byName(modelName)
+            if lastModel is None:
+                thisModelOk = False
+                print(f"""Template {ord}:{template["name"]} should belong in model {lastModelName} which does not exists.""", file = sys.stderr)
+                continue
         if ord != lastOrd+1:
-            print (f"""The template in ord {lastOrd+1} is missing while {ord} is present,
-            for model {mid}:{fn["name"]}""", filde = sys.stderr)
-            midOk = False
+            if template is None:
+                debug("template is None")
+            print (f"""The template in ord {lastOrd+1} is missing while {ord}:{template["name"]} is present, for model {lastModel["id"]}:{modelName}""", file = sys.stderr)
+            lastModelOk = False
             continue
+        lastOrd = ord
         listTemplates.append(template)
     endModel(lastModel, listTemplates)
     mw.col.models.flush()
@@ -68,12 +76,12 @@ def endModel(model, listTemplates):
 def getRows():
     models = mw.col.models.models
     for model in models.values():
-        mid = model["id"]
+        modelName = model["name"]
         if "tmpls" in model:
             for template in model["tmpls"]:
                 yield (
                     json.dumps(template),
-                    mid,
+                    modelName,
                     template["ord"],
                     template["afmt"],
                     template["bafmt"],
@@ -85,5 +93,4 @@ def getRows():
         else:
             print(f"No tmpls in {model}", file = sys.stderr)
 
-from ..meta import Data
-data = Data(table, getRows, allLines)
+table = Table(name, columns, getRows, allLines, uniques = [["ord","model"],["name","model"]], order = ["model", "ord"])

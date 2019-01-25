@@ -1,18 +1,17 @@
 from ..db import *
 from aqt import mw
-from .decks import data
 import json
 
 name= "models"
 columns=[
     Column(name="json", type="TEXT"),
     Column(name="css",type="Text"),
-    Column(name="did",type="INTEGER", references= Reference(column="decks", table="id", delete= setNull, update = cascade)),
-    Column(name="id",type="INTEGER", primary=TRUE),
+    Column(name="deck",type="text", reference= Reference(column="decks", table="name", onDelete= setNull, update = cascade)),
+    Column(name="id", type="integer", primary=True),
     Column(name="latexPost",type="Text"),
     Column(name="latexPre",type="Text"),
     Column(name="mod",type="int"),
-    Column(name="name",type="Text"),
+    Column(name="name",type="Text",unique = True),
     Column(name="req",type="TEXT"),
     Column(name="sortf",type="int"),
     Column(name="tags",type="TEXT"),
@@ -22,7 +21,7 @@ columns=[
     Column(name="usn",type="INT"),
     Column(name="vers",type="TEXT"),
 ]
-table = Table(name, columns)
+
 def getTemplates(id):
     model = mw.col.models.get(id)
     if model:
@@ -30,10 +29,11 @@ def getTemplates(id):
     return []
 
 def oneLine(line):
-    json, css, did, id, latexPost, latexPre, mod, name, req, sortf, tags, nb_tmpls, nb_fields, type, usn, vers = line
+    json, css, deckName, id, latexPost, latexPre, mod, name, req, sortf, tags, nb_tmpls, nb_fields, type, usn, vers = line
     oldModel = mw.col.models.get(id)
     templates = oldModel["tmpls"]
     fields = oldModel["flds"]
+    did = mw.col.decks.byName(deckName)
     model = dict(
         css = css,
         did = did,
@@ -44,7 +44,6 @@ def oneLine(line):
         name = name,
         sortf = sortf,
         flds = fields,
-        tmpls = templates,
         tags = json.loads (tags),
         type = 1 if type else 0,
         usn = usn,
@@ -62,7 +61,7 @@ def allLines(lines):
         models = mw.col.models.models
     for line in lines:
         id, model = oneLine(line)
-        models[id]=model
+        models[str(id)]=model
     mw.col.models.models = models
     mw.col.models.changed = True
     mw.col.models.flush()
@@ -70,11 +69,14 @@ def allLines(lines):
 def getRows():
     models = mw.col.models.models
     for model in models.values():
+        did = model["did"]
+        deck = mw.col.decks.get(did)
+        deckName = deck["name"]
         try:
             yield (
                 json.dumps(model),
                 model["css"],
-                model["did"],
+                deckName,
                 model["id"],
                 model["latexPost"],
                 model["latexPre"],
@@ -91,5 +93,4 @@ def getRows():
             )
         except:
             raise
-from ..meta import Data
-data = Data(table, getRows, allLines)
+table = Table(name, columns, getRows, allLines)

@@ -1,4 +1,4 @@
-# Clearer database
+# Readable database
 ## Rationale
 If you're an add-on developper, you may hate anki's database. It's
 totally unreadable. It's hard to get a direct access in it to debug
@@ -23,6 +23,11 @@ add-on allow you to do that. It creates empty tables you can fill as
 you want. Once filled, you can use the add-on to port those new table
 to anki's database.
 
+**WARNING: This functionnality should be considered in BETA mode. It
+is entirely possible that it breaks thing, so do a backup and check
+the result if you use this functionnality. And please let me know any
+problem you had. I tested the add-on but I may have forgotten some to
+test some cases !**
 
 ## Basic usage
 In this section, we describe the most basic usage of this add-on. We
@@ -92,7 +97,7 @@ the readable database.
 
 ### Empty or delete the new tables
 You can destroy or deleted the new tables by clicking the button
-"delete the new tables" and "empty the new tables". While you keep the
+"delete the new tables" and "empty readable tables". While you keep the
 decks default configuration, deleting the tables is pretty useless. It
 only free spaces on your disk. You can use empty table to add contents
 using either another program or just a database editor. You can then

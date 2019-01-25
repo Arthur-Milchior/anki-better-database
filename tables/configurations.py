@@ -1,54 +1,55 @@
 from ..db import *
+from ..debug import *
 import json
 from ..config import *
 from aqt import mw
 name="configurations"
 
-columns = ([
-    Column(name="json", type="TEXT")
-    Column(name="name", type="text", unique= True),
-    Column(name="maxTaken",type="int"),
-    Column(name="timer",type="BOOLEAN"),
-    Column(name="autoplay",type="BOOLEAN"),
-    Column(name="replayq",type="BOOLEAN"),
-    Column(name="mod",type="int"),
-    Column(name="usn",type="int"),
-    Column(name="dyn",type="BOOLEAN"),
-    Column(name="id", type="int", primary=True)
-]+
-          [
-              "new_delays",
-              "ints",
-              Column(name="initial_factor",type="NUMERIC"),
-              "separate",
-              Column(name="random",type="BOOLEAN"),
-              Column(name="new_perDay",type="int"),
-              Column(name="new_bury",type="BOOLEAN"),
-          ]+
-          [
-              "lapse_delays",
+columns = (
+    [
+        Column(name="json", type="TEXT"),
+        Column(name="name", type="text", unique= True),
+        Column(name="maxTaken",type="int"),
+        Column(name="timer",type="BOOLEAN"),
+        Column(name="autoplay",type="BOOLEAN"),
+        Column(name="replayq",type="BOOLEAN"),
+        Column(name="mod",type="int"),
+        Column(name="usn",type="int"),
+        Column(name="dyn",type="BOOLEAN"),
+        Column(name="id", type="int", primary=True)
+    ]+
+           [
+               "new_delays",
+               "ints",
+               Column(name="initial_factor",type="NUMERIC"),
+               "separate",
+               Column(name="random",type="BOOLEAN"),
+               Column(name="new_perDay",type="int"),
+               Column(name="new_bury",type="BOOLEAN"),
+           ]+
+           [
+               "lapse_delays",
               Column(name="mult",type="NUMERIC"),
               Column(name="minInt",type="NUMERIC"),
               Column(name="leechFails",type="INT"),
               Column(name="leechSuspend",type="BOOLEAN"),
           ]+
-          [
-              "review_perDay",
-              Column(name="ease4",type="NUMERIC"),
-              Column(name="fuzz",type="NUMERIC"),
-              "minSpace",
-              Column(name="ivlFct",type="NUMERIC"),
-              Column(name="maxIvl",type="NUMERIC"),
-              Column(name="review_bury",type="BOOLEAN"),
-     ]
-     )
+           [
+               "review_perDay",
+               Column(name="ease4",type="NUMERIC"),
+               Column(name="fuzz",type="NUMERIC"),
+               "minSpace",
+               Column(name="ivlFct",type="NUMERIC"),
+               Column(name="maxIvl",type="NUMERIC"),
+               Column(name="review_bury",type="BOOLEAN"),
+           ]
+)
 
-table = Table(name, columns)
 
 def getRows():
     col = mw.col
     configurations = col.decks.allConf()
-    #print(f"Decks are {decks}")
+    #debug(f"Decks are {decks}")
     for configuration in configurations:
         yield (
             json.dumps(configuration),
@@ -86,37 +87,42 @@ def getRows():
            )
 
 def oneLine(line):
-    json, name, maxTaken, timer, autoPlay, replayQ, mod, usn, dyn, id, new_delay, ints, initialFactor, separate, random, new_perDay, new_bury, lapse_delays, mult, minInt, leechFails, leechSuspend, review_perDay, ease4, fuzz, minSpace, ivlFct, maxIvl, review_bury = line
+    (json_,
+     name, maxTaken, timer, autoplay, replayq, mod, usn, dyn, id,
+     new_delays, ints, initialFactor, separate, random, new_perDay, new_bury,
+     lapse_delays, mult, minInt, leechFails, leechSuspend,
+     review_perDay, ease4, fuzz, minSpace, ivlFct, maxIvl, review_bury )= line
     new = dict(
-        delays = delays,
+        delays = new_delays,
         ints = ints,
         initialFactor = initialFactor,
         separate = separate,
         order = 0 if random else 1,
         perDay = new_perDay,
-    bury = bury)
+        bury = new_bury,
+    )
     lapse = dict(
-        delays = json.loads(delays),
+        delays = json.loads(lapse_delays),
         mult = mult,
         minInt = minInt,
         leechFails = leechFails,
         leechAction = 0 if leechSuspend else 1
     )
     rev = dict(
-        perdDay = json.loads(review_perDay),
+        perDay = json.loads(review_perDay),
         ease4 = ease4,
         fuzz = fuzz,
         minSpace = minSpace,
         ivlFct = ivlFct,
         maxIvl = maxIvl,
-        bury = bury
+        bury = review_bury
     )
     conf = dict(
         name = name,
         maxTaken = maxTaken,
         timer = 1 if timer else 0,
         autoplay = autoplay,
-        replayQ = replayQ,
+        replayq = replayq,
         mod = mod,
         usn = usn,
         dyn = dyn,
@@ -136,5 +142,4 @@ def allLines(lines):
         d[str(id)] = conf
     mw.col.decks.flush()
 
-from ..meta import Data
-data = Data(table, getRows, allLines)
+table = Table(name, columns, getRows, allLines)

@@ -1,3 +1,4 @@
+from ..debug import *
 from ..db import *
 import json
 from aqt import mw
@@ -14,16 +15,16 @@ columns = [
     "descr",# r added, because desc means descending
     "dyn",
     Column(name="collapsed", type="BOOLEAN"),
-    Column(name="extendNew", type="INTEGER"),
-    Column(name="extendRev", type="INTEGER"),
-    Column(name="name", type="TEXT",unique=True),
+    Column(name="extendNew", type="integer"),
+    Column(name="extendRev", type="integer"),
+    Column(name="name", type="TEXT", unique=True),
     Column(name="browserCollapsed", type="BOOLEAN"),
-    Column(name="id", type="INTEGER", PRIMARY=TRUE),
-    Column(name="mod", type="INTEGER")
+    Column(name="id", type="integer", primary=True),
+    Column(name="mod", type="integer")
 ]
 
 def oneLine(line):
-    json, newToday, revToday, lrnToday, timeToday, conf, usn, descr, dyn, collapsed, extendNew, extendRev, name, browserCollapsed, id, mod = line
+    (json_, newToday, revToday, lrnToday, timeToday, conf, usn, desc, dyn, collapsed, extendNew, extendRev, name, browserCollapsed, id, mod) = line
     deck = dict(
         newToday = json.loads(newToday),
         revToday = json.loads(revToday),
@@ -57,14 +58,13 @@ def allLines(lines):
     mw.col.decks.flush()
 
 
-table = Table(name, columns)
 
 def getRows():
     col = mw.col
     decks = col.decks.decks
-    #print(f"Decks is {decks}")
+    #debug(f"Decks is {decks}")
     for deck in decks.values():
-        #print(f"Deck is {deck}")
+        #debug(f"Deck is {deck}")
         yield (
             json.dumps(deck),
             json.dumps(deck["newToday"]),
@@ -82,5 +82,4 @@ def getRows():
             deck.get("browserCollapsed",None),
             deck["id"],
             deck["mod"])
-from ..meta import Data
-data = Data(name, columns, getRows, allLines)
+table = Table(name, columns, getRows, allLines)

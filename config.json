@@ -18,5 +18,5 @@
   },
   "use anki's database":false,
   "deletion":false,
-  "keep table":false
+  "keep table":true
 }

@@ -1,28 +1,33 @@
+from ..debug import *
 from aqt import mw
-from .fieldnames import data
 from ..db import *
 import sys
+import os
 
 name= "fields"
-column=[
-    Column(name="nid", type="INTEGER"#, reference= Reference(table="notes", column="id", delete=cascade, update= cascade)
-    ),
-    Column(name="name", type="TEXT", references= Reference(column= "fieldnames", column="name", delete= CASCADE, update= cascade)),
+columns=[
+    Column(name="nid", type="integer", reference= Reference(table="notes", column="id", onDelete=cascade, update= cascade)),
+    Column(name="name", type="TEXT", reference= Reference(table= "fieldnames", column="name", onDelete= cascade, update= cascade)),
     Column(name="value",type="TEXT")
 ]
 
-table = Table(name, columns, ["name","nid"], order = ["nid"])
+
 
 lastNid = None
 lastNote = None
 seenNames = None
-def getModel(note):
+def getModelFromNote(note):
     mid = note.mid
-    return mw.col.models.get(mid)
+    model = mw.col.models.get(mid)
+    if model is None:
+        print(f"Note {note.id}'s model id is {mid}, which corresponds to no model", file = os.stderr)
+    return model
 
 def getMap(note):
-    model = getModel(note)
-    map = mw.col.models.fieldMap(mid)
+    model = getModelFromNote(note)
+    if model is None:
+        return None
+    map = mw.col.models.fieldMap(model)
     return map
 
 def endGroup():
@@ -30,12 +35,15 @@ def endGroup():
     if lastNid is None:
         return
     map = getMap(lastNote)
+    if map is None:
+        print(f"This this note can't be saved", file = os.stderr)
+        return
     if len(seenNames)< len(map):
-        print(f"""The following fields are in the model {getModel(lastNote)["name"]}, but not used in it's note {lastNid}:""", file = sys.stderr)
+        print(f"""The following fields are in the model {getModelFromNote(lastNote)["name"]}, but not used in it's note {lastNid}:""", file = sys.stderr)
         for key in map:
             if key not in seenNames:
                 print(key, file = sys.stderr)
-        print(f"""Their previous value were kept.""", file = sys.stderr)
+        debug(f"""Their previous value were kept.""", file = sys.stderr)
         return
     lastNote.flush()
 
@@ -52,6 +60,7 @@ def oneLine(line):
     """Python error while loading note if the nid does not exists"""
     nid,name,value = line
     note = getNote(nid)
+    model = getModelFromNote(note)
     map = getMap(note)
     if name not in map:
         print (f"""You have a value for field {name} of note {nid} whose model is {model["name"]}, which does not have any field with this name""", file = sys.stderr)
@@ -77,5 +86,4 @@ def getRows():
             value = note.fields[ord]
             name = fieldNames[ord]
             yield (nid,name, value)
-from ..meta import Data
-data = Data(table, getRows, allLines)
+table = Table(name, columns, getRows, allLines, uniques = ["name","nid"], order = ["nid"])

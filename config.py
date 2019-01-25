@@ -1,5 +1,10 @@
 import aqt
+from .debug import *
 from aqt import mw
+import os
+from anki.db import DB
+path = os.path.dirname(os.path.abspath(__file__))
+name = mw.pm.name
 
 localDb = None
 def getLocalDb():
@@ -33,9 +38,12 @@ def shouldDelete():
     return getUserOption().get("deletion", False)
 
 def getDb():
-    if addTableInAnki()
+    if addTableInAnki():
         return mw.col.db
     else:
         return getLocalDb()
+
 def keepTable():
-    return getUserOption().get("keep table", False):
+    keep = getUserOption().get("keep table", False)
+    #debug(f"should we keep table: {keep}")
+    return keep

@@ -1,23 +1,24 @@
 from ..db import *
+from ..debug import *
 from aqt import mw
 import json
 import sys
 
 name= "fieldnames"
-column=[
+columns=[
     Column(name="json", type="TEXT"),
     Column(name="name", type="TEXT"),
     Column(name="ord", type="INT"),
-    Column(name="mid", type="INT", references = Reference(column = "models", table="id", delete = setNull, update=cascade)),
+    Column(name="model", type="TEXT", reference = Reference(column = "models", table="name", onDelete = setNull, update=cascade)),
     Column(name="font", type="TEXT"),
     Column(name="media"),
     Column(name="rtl"),
     Column(name="sticky",type="BOOLEAN"),
-    Column(name="size",type="INTEGER"),
+    Column(name="size",type="integer"),
 ]
 
 def oneLine(line):
-    json, name, ord, mid, font, media, rtl, sticky, size = line
+    json_, name, ord, modelName, font, media, rtl, sticky, size = line
     fn = dict(
         name = name,
         ord = ord,
@@ -27,39 +28,51 @@ def oneLine(line):
         sticky = sticky,
         size = size
     )
-    return fn, mid, ord
+    return fn, modelName, ord
 
-def endMid(model, fields):
+def endThisModel(model, fields):
     if model is None:
         return
     model["flds"] = fields
     mw.col.models.save(model)
 
-table = Table(name, columns, ["ord","mid"], order = ["mid"], order = ["mid","ord"])
 def allLines(lines):
-    lastMid = None
+    lastModelName = None
     lastOrd = None
     lastModel = None
-    midOk = True
+    thisModelOk = True
     listFields = []
     for line in lines:
-        fn, mid, ord= oneLine(line)
-        if mid == lastMid:
-            if not midOk:
+        debug(f"""
+------
+Considering line: «{line}»""")
+        fn, modelName, ord= oneLine(line)
+        if modelName == lastModelName:
+            debug("Same modelName")
+            if not thisModelOk:
+                debug("not ok, thus continue")
                 continue
         else:
-            midOk = True
-            endMid(lastModel,listFields)
-            lastMid = mid
+            debug("New modelName")
+            endThisModel(lastModel,listFields)
+            lastModelName = modelName
             lastOrd = -1
-            lastModel = mw.col.models.get(mid)
+            lastModel = mw.col.models.byName(modelName)
+            if lastModel is None:
+                thisModelOk = False
+                print(f"""Field name {ord}:{fn["name"]} should belong in model {modelName} which does not exists.""", file = sys.stderr)
+                continue
+            thisModelOk = True
             listFields = []
         if ord != lastOrd+1:
-            print (f"""The field in ord {lastOrd+1} is missing while {ord} is present, for model {mid}:{fn["name"]}""", filde = sys.stderr)
-            midOk = False
+            if fn is None:
+                debug("fn is None")
+            print(f"""The field name in ord {lastOrd+1} is missing while the field name {ord}:{fn["name"]} is present, for model {lastModel["id"]}:{lastModel["name"]}""", file = sys.stderr)
+            thisModelOk = False
             continue
+        lastOrd = ord
         listFields.append(fn)
-    endMid(lastModel,listFields)
+    endThisModel(lastModel,listFields)
     mw.col.models.flush()
 
 
@@ -68,16 +81,17 @@ def getRows():
     models = col.models.models
     for model in models.values():
         modelId = model["id"]
+        modelName = model["name"]
         for field in model["flds"]:
             yield (
                 json.dumps(field),
                 field["name"],
                 int(field["ord"]),
-                modelId,
+                modelName,
                 field["font"],
                 json.dumps(field["media"]),
                 field["rtl"],
                 field["sticky"],
                 field["size"])
-from ..meta import Data
-data = Data(table, getRows, allLines)
+
+table = Table(name, columns, getRows, allLines, uniques = [["ord","model"],["name","model"],], order = ["model","ord"])

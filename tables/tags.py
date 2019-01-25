@@ -4,10 +4,9 @@ from ..config import *
 
 name= "tags"
 columns = [
-    Column(name="nid", type="INTEGER", references= Reference(table="notes", column="id", delete=cascade, update= cascade)),
+    Column(name="nid", type="integer", reference= Reference(table="notes", column="id", onDelete=cascade, update= cascade)),
     Column(name="tag", type="TEXT"),
 ]
-table = Table(name, columns, ["tag","nid"], order = ["nid"])
 
 def getRows():
     nids = mw.col.findNotes("")
@@ -46,5 +45,4 @@ def oneLine(line):
 def allLines(lines):
     for line in lines:
         oneLine(line)
-from ..meta import Data
-data = Data(table, getRows, allLines)
+table = Table(name, columns, getRows, allLines, uniques = ["tag","nid"], order = ["nid"])
