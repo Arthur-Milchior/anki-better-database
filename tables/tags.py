@@ -1,12 +1,13 @@
 from aqt import mw
 from ..db import *
+from ..config import *
 
 name= "tags"
 columns = [
     Column(name="nid", type="INTEGER", references= Reference(table="notes", column="id", delete=cascade, update= cascade)),
     Column(name="tag", type="TEXT"),
 ]
-table = Table(name, columns, ["tag","nid"])
+table = Table(name, columns, ["tag","nid"], order = ["nid"])
 
 def getRows():
     nids = mw.col.findNotes("")
@@ -15,5 +16,35 @@ def getRows():
         tags = note.tags
         for tag in tags:
             yield (nid, tag)
+
+lastNid = None
+lastNote = None
+listTag = []
+
+def endGroup():
+    lastNote.setTagsFromStr(" ".join(listTag))
+    lastNote.flush()
+
+def getNote(nid):
+    global lastNid
+    if nid != lastNid:
+        endGroup()
+        lastNid = nid
+        lastNote = mw.col.getNote(nid)
+        if shouldDelete():
+            listTag = []
+        else:
+            listTag = lastNote.tags
+    return lastNote
+
+def oneLine(line):
+    """Python error while loading note if the nid does not exists"""
+    nid,tag = line
+    getNote(nid)
+    listTag.append(tag)
+
+def allLines(lines):
+    for line in lines:
+        oneLine(line)
 from ..meta import Data
-data = Data(name, columns, getRows, end)
+data = Data(table, getRows, allLines)

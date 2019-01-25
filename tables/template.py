@@ -17,10 +17,52 @@ columns = [
     Column(name="did",type="INTEGER", reference= Reference("models", "id",  delete = setNull)),
     Column(name="name",type="Text"),
 ]
-table = Table(name, columns, ["ord","mid"])
+table = Table(name, columns, ["ord","mid"], order = ["mid", "ord"])
 
 def oneLine(line):
     json, mid, ord, afmt, bafmt, qfmt, bqfmt, did, name = line
+    template = dict(
+        ord = ord,
+        afmt = afmt,
+        bafmt = bafmt,
+        qfmt = qfmt,
+        bqfmt = bqfmt,
+        did = did,
+        name = nane,
+    )
+    return mid, ord, template
+
+def allLines(lines):
+    lastOrd = None
+    lastMid = None
+    lastModel = None
+    listTemplates = []
+    midOk = True
+    for line in lines:
+        mid,ord,template = oneLine(line)
+        if lastMid == mid:
+            if not midOk:
+                continue
+        else:
+            endModel(lastModel, listTemplates)
+            midOk = True
+            lastOrd = -1
+            lastMid = mid
+            lastModel = mw.col.models.get(mid)
+        if ord != lastOrd+1:
+            print (f"""The template in ord {lastOrd+1} is missing while {ord} is present,
+            for model {mid}:{fn["name"]}""", filde = sys.stderr)
+            midOk = False
+            continue
+        listTemplates.append(template)
+    endModel(lastModel, listTemplates)
+    mw.col.models.flush()
+
+def endModel(model, listTemplates):
+    if model is None:
+        return
+    model["tmpls"] = listTemplates
+    mw.col.models.save(model)
 
 
 def getRows():
@@ -44,4 +86,4 @@ def getRows():
             print(f"No tmpls in {model}", file = sys.stderr)
 
 from ..meta import Data
-data = Data(name, fields, getRows)
+data = Data(table, getRows, allLines)

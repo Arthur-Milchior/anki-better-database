@@ -7,11 +7,22 @@ it.
 Because configuration is saved in a json string. Because fields and
 tags are saved as concatenated text.
 
-Thus, this add-on's only purpose is to help correct all of this. This
-add-on create a new database, which we'll call the "readable
+Thus, this add-on's only purpose is to help correct all of this. It
+allow to do mostly two things.
+
+### Reading anki database
+This add-on create a new database, which we'll call the "readable
 database". It puts in this database the content from the original anki
 database which was hard to read. You can then edit the readable
 database and the edition will be ported to anki's database.
+
+### Creating a readable database and port it to anki.
+Sometime, I want to create complex models. I prefer to create them
+directly in a readable database, and then port them to anki. This
+add-on allow you to do that. It creates empty tables you can fill as
+you want. Once filled, you can use the add-on to port those new table
+to anki's database.
+
 
 ## Basic usage
 In this section, we describe the most basic usage of this add-on. We
@@ -54,11 +65,18 @@ is changed so that it reflects the meaning of the truth value of the Boolean.
 ### Rebuild your database
 Let us assume you have edit the readable database. You may want to
 port those change to anki's database. To do this, in the main window,
-choose "rebuild database". The content of the readable database will
-be ported to anki database. The only exception is the ```json```
-column, which will be ignored.
+choose "rebuild database". Most of the contents of the readable
+database will be ported to anki database. The only data from the
+readable database not ported to anki's database is:
+* the column name ```json```.
+* in the table models, the column ```nb_tmpls``` and ```nb_fields```.
 
-Note that content is edited or added, but not deteled.
+In general content is edited or added. If you delete a tag, a deck, a
+model or a field from the readable database, it will not be deleted
+from anki database. However, if you delete a fieldname or a template
+from the readable database, it will also be deleted from anki
+database. This is because those two kind of data correspond to ordered
+list in which the position/order is really important.
 
 If the database can't be rebuild, you'll have an error
 message. Hopefully, it will be clear. But you may also obtain a python
@@ -69,10 +87,16 @@ An example of possible error: if you have a note type with 2 fields,
 but only have two fields for this note in the readable database after
 you did edit it. In this case, the note can't be rebuild.
 
-### Delete the new tables
-You can destroy the new tables by clicking the button "delete the new
-tables". While you keep the decks default configuration, this action
-is pretty useless. It only free spaces on your disk.
+If the rebuilding was done properly, the table will be dropped from
+the readable database.
+
+### Empty or delete the new tables
+You can destroy or deleted the new tables by clicking the button
+"delete the new tables" and "empty the new tables". While you keep the
+decks default configuration, deleting the tables is pretty useless. It
+only free spaces on your disk. You can use empty table to add contents
+using either another program or just a database editor. You can then
+port this content into anki using the action "rebuild".
 
 ### Database constraints
 The tables are created with constraints which should make sens if it
@@ -120,9 +144,42 @@ deletion won't be ported to anki database. You can choose to alter
 this behavior in the configuration by setting the ```deletion``` to
 true.
 
-Note that if you delete a field name, for example, you'll obtain an
-error message, unless you also deleted the associated note or edited
-it's note type.
+A few note related to what will happen if we delete an entry, for each
+table:
+* template: multiple cases should be considered:
+  * if you delete every template of a model, this will have no
+	effect.
+  * if at least one template exists for the model, then the templates
+	present will be considered to be the actual list of templates. It
+	is mandatory that templates are numbered from 0 up to n-1, with n
+	the number of template of the model
+* fieldname: the behavior is exactly the same as for template. Note
+  that the field content in each note will also disappear if the
+  current add-on is used for both field and field names.
+* Models: if you delete a model, all of its note, card and template
+  will be deleted when you check the database.
+* Deck: If you delete a deck, anki's «check database» will find card without
+  deck and move them to the default deck.
+* fields: if you delete this, it won't be taken into account. You
+  can't actually deleted a field without deleting it's whole
+  note.
+* tags: the tag will disappear from the note. And that's all which
+  will occur.
+
+Let us also say a word about deletion of entry in anki's database:
+* note: if you delete a note, all of it's card and it's tag will
+  eventually be deleted.
+* card: if the template state that the card should exists, it will be
+   generated again when anki realize it is missing. However, it will
+   have a new id, and every related informations will be
+   reinitialized.
+* col: just don't do that. You'll break anki.
+* graves: ard to say what will occur if you remove an entry
+* revlog: the only consequence will be to sligthly change your statistics.
+
+### Keeping readable table after rebuilding
+By setting "keep table" to true, the tables won't be deleted after you
+rebuild anki database. This is dangerous if the tables are in anki database.
 
 ## Warning
 ### Back up

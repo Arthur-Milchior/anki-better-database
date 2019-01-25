@@ -1,5 +1,6 @@
 from ..db import *
 import json
+from ..config import *
 from aqt import mw
 name="configurations"
 
@@ -124,7 +125,16 @@ def oneLine(line):
         lapse = lapse,
         rev = rev
     )
-    return conf
+    return id, conf
+
+def allLines(lines):
+    if shouldDelete():
+        mw.col.decks.dconf = dict()
+    d = mw.col.decks.dconf
+    for line in lines:
+        id, conf = oneLine(line)
+        d[str(id)] = conf
+    mw.col.decks.flush()
 
 from ..meta import Data
-data = Data(table, getRows)
+data = Data(table, getRows, allLines)

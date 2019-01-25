@@ -2,6 +2,7 @@ from aqt import mw
 from anki.db import DB
 import os
 from .config import considerTable, getDb, isTableInSameDb
+from .utils import *
 
 path = os.path.dirname(os.path.abspath(__file__))
 name = mw.pm.name
@@ -30,17 +31,17 @@ class Reference:
 setNull = "set null"
 cascade = "cascade"
 class Column:
-    def __init__(self, name, type = None, reference = None, unique = None, primary = None, notNull = None):
+    def __init__(self, name, type = None, reference = None, uniques = None, primary = None, notNull = None):
         self.name = name
         self.type = type
         self.reference = reference
-        self.unique = unique
+        self.uniques = uniques
 
     def create(self):
         t = self.name
         if self.type:
             t += f" {self.type}"
-        if self.unique:
+        if self.uniques:
             t += f" unique"
         if self.reference:
             t += f" "+reference.create()
@@ -52,10 +53,14 @@ class Column:
 
 class Table:
     tables = []
-    def __init__(self, name, columns, unique = None):
+    def __init__(self, name, columns, uniques = None, order = None):
         self.name = name
-        self.unique = unique
+        self.uniques = uniques
         self.columns = columns
+        if isinstance(order,type):
+            order = [order]
+        self.order = order
+        order.solt = order
         for i in range(len(columns)):
             column = columns[i]
             if isinstance(columns, str):
@@ -64,22 +69,10 @@ class Table:
 
     def create(self):
         t = "CREATE table if not exists {self.name} ("
-        first = True
-        for column in self.columns:
-            if first:
-                first = False
-            else:
-                t+=", "
-            t+=column.create()
-        if self.unique:
+        t+=commaJoin(self.columns, lambda colum:column.create())
+        if self.uniques:
             t+= "UNIQUE ("
-            first = True
-            for unique in self.unique:
-                if first:
-                    first = False
-                else:
-                    t+=", "
-                t+= unique
+            t+= commaJoin(self.uniques)
             t+=")"
         t+= ");"
         return t
@@ -92,12 +85,7 @@ class Table:
     def insert_query(self):
         query = f"insert or replace into {self.name} ("
         first = True
-        for  column in self.columns:
-            if first:
-                first = False
-            else:
-                query+=", "
-            query+=column.name
+        query+= commaJoin(self.columns, (lambda column:column.name))
         query+=") values(?"
         query+=",?"*(len(self.columns)-1)
         query += ")"
@@ -131,13 +119,11 @@ class Table:
     def select_query(self):
         t = "select ("
         first = True
-        for colum in self.columns:
-            if first:
-                first = False
-            else:
-                t+=", "
-            t+=column.name
+        t+= commaJoin(self.columns, (lambda column:column.name))
         t+=f") from {self.name}"
+        if self.order:
+            t+= f " order by "
+            t+= commaJoin(self.order)
         return t
 
     def select(self):

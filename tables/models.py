@@ -17,14 +17,24 @@ columns=[
     Column(name="sortf",type="int"),
     Column(name="tags",type="TEXT"),
     "nb_tmpls",
+    "nb_fields",
     Column(name="cloze",type="BOOLEAN"),
     Column(name="usn",type="INT"),
     Column(name="vers",type="TEXT"),
 ]
 table = Table(name, columns)
+def getTemplates(id):
+    model = mw.col.models.get(id)
+    if model:
+        return model["tmpls"]
+    return []
+
 def oneLine(line):
-    json, css, did, id, latexPost, latexPre, mod, name, req, sortf, tags, tmpls, type, usn, vers = line
-    models = dict(
+    json, css, did, id, latexPost, latexPre, mod, name, req, sortf, tags, nb_tmpls, nb_fields, type, usn, vers = line
+    oldModel = mw.col.models.get(id)
+    templates = oldModel["tmpls"]
+    fields = oldModel["flds"]
+    model = dict(
         css = css,
         did = did,
         id = id,
@@ -33,14 +43,29 @@ def oneLine(line):
         mod = mod,
         name = name,
         sortf = sortf,
+        flds = fields,
+        tmpls = templates,
         tags = json.loads (tags),
         type = 1 if type else 0,
         usn = usn,
-        vers = json.loads(vers)
+        vers = json.loads(vers),
+        tmpls = getTemplates(id)
     )
     if req is not None:
-        models["req"] = json.loads(req)
-    #todo: tmpls
+        model["req"] = json.loads(req)
+    return id, model
+
+def allLines(lines):
+    if shouldDelete():
+        models = dict()
+    else:
+        models = mw.col.models.models
+    for line in lines:
+        id, model = oneLine(line)
+        models[id]=model
+    mw.col.models.models = models
+    mw.col.models.changed = True
+    mw.col.models.flush()
 
 def getRows():
     models = mw.col.models.models
@@ -59,6 +84,7 @@ def getRows():
                 model["sortf"],
                 json.dumps(model["tags"]),
                 len(model["tmpls"]),
+                len(model["flds"]),
                 int(model["type"])==1,#otherwise 0
                 model["usn"],
                 json.dumps(model["vers"])
@@ -66,4 +92,4 @@ def getRows():
         except:
             raise
 from ..meta import Data
-data = Data(name, column, getRows)
+data = Data(table, getRows, allLines)

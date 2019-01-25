@@ -1,6 +1,7 @@
 from ..db import *
 from aqt import mw
 import json
+import sys
 
 name= "fieldnames"
 column=[
@@ -15,7 +16,6 @@ column=[
     Column(name="size",type="INTEGER"),
 ]
 
-table = Table(name, columns, ["ord","mid"])
 def oneLine(line):
     json, name, ord, mid, font, media, rtl, sticky, size = line
     fn = dict(
@@ -27,7 +27,40 @@ def oneLine(line):
         sticky = sticky,
         size = size
     )
-    return fn, mid
+    return fn, mid, ord
+
+def endMid(model, fields):
+    if model is None:
+        return
+    model["flds"] = fields
+    mw.col.models.save(model)
+
+table = Table(name, columns, ["ord","mid"], order = ["mid"], order = ["mid","ord"])
+def allLines(lines):
+    lastMid = None
+    lastOrd = None
+    lastModel = None
+    midOk = True
+    listFields = []
+    for line in lines:
+        fn, mid, ord= oneLine(line)
+        if mid == lastMid:
+            if not midOk:
+                continue
+        else:
+            midOk = True
+            endMid(lastModel,listFields)
+            lastMid = mid
+            lastOrd = -1
+            lastModel = mw.col.models.get(mid)
+            listFields = []
+        if ord != lastOrd+1:
+            print (f"""The field in ord {lastOrd+1} is missing while {ord} is present, for model {mid}:{fn["name"]}""", filde = sys.stderr)
+            midOk = False
+            continue
+        listFields.append(fn)
+    endMid(lastModel,listFields)
+    mw.col.models.flush()
 
 
 def getRows():
@@ -47,4 +80,4 @@ def getRows():
                 field["sticky"],
                 field["size"])
 from ..meta import Data
-data = Data(name, column, getRows, end)
+data = Data(table, getRows, allLines)

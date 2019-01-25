@@ -28,9 +28,14 @@ def isTableInSameDb(table):
     return considerTable(table) or (addTableInAnki() and table in {"cards", "col", "graves", "notes", "revlog"})
 
 def addTableInAnki():
-    return getUserOption().get("use anki's database", False):
+    return getUserOption().get("use anki's database", False)
+def shouldDelete():
+    return getUserOption().get("deletion", False)
+
 def getDb():
     if addTableInAnki()
         return mw.col.db
     else:
         return getLocalDb()
+def keepTable():
+    return getUserOption().get("keep table", False):

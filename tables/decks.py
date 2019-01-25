@@ -45,7 +45,16 @@ def oneLine(line):
         deck["extendRev"] = extendRev
     if browserCollapsed is not None:
         deck["browserCollapsed"] = browserCollapsed
-    return deck
+    return id, deck
+
+def allLines(lines):
+    if shouldDelete():
+        mw.col.decks.decks = dict()
+    d = mw.col.decks.decks
+    for line in lines:
+        id, deck = oneLine(line)
+        d[str(id)] = deck
+    mw.col.decks.flush()
 
 
 table = Table(name, columns)
@@ -74,4 +83,4 @@ def getRows():
             deck["id"],
             deck["mod"])
 from ..meta import Data
-data = Data(name, columns, getRows)
+data = Data(name, columns, getRows, allLines)
