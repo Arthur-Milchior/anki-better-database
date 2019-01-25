@@ -7,13 +7,13 @@ import json
 name= "template"
 columns = [
     Column(name="json", type="TEXT"),
-    Column(name="model",type="text", reference= Reference("models", "name",  onDelete = cascade)),
+    Column(name="model",type="text", reference= Reference("models", "name",  onDelete = cascade, update = cascade)),
     Column(name="ord",type="int"),
     Column(name="afmt",type="Text"),
     Column(name="bafmt",type="Text"),
     Column(name="qfmt",type="Text"),
     Column(name="bqfmt",type="Text"),
-    Column(name="did",type="integer", reference= Reference("models", "id",  onDelete = setNull)),
+    Column(name="did",type="integer", reference= Reference("models", "id",  onDelete = setNull, update = cascade)),
     Column(name="name",type="Text"),
 ]
 
@@ -46,11 +46,11 @@ Considering line: «{line}»""")
         else:
             debug("New modelName")
             listTemplates = []
+            lastModelName = modelName
+            lastModel = mw.col.models.byName(modelName)
             endModel(lastModel, listTemplates)
             lastModelOk = True
             lastOrd = -1
-            lastModelName = modelName
-            lastModel = mw.col.models.byName(modelName)
             if lastModel is None:
                 thisModelOk = False
                 print(f"""Template {ord}:{template["name"]} should belong in model {lastModelName} which does not exists.""", file = sys.stderr)

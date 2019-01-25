@@ -12,10 +12,6 @@ columns=[
 ]
 
 
-
-lastNid = None
-lastNote = None
-seenNames = None
 def getModelFromNote(note):
     mid = note.mid
     model = mw.col.models.get(mid)
@@ -30,36 +26,28 @@ def getMap(note):
     map = mw.col.models.fieldMap(model)
     return map
 
-def endGroup():
-    global lastNid, lastNote, seenNames
-    if lastNid is None:
+def endGroup(nid,note,seenNames):
+    if note is None:
         return
-    map = getMap(lastNote)
+    map = getMap(note)
     if map is None:
         print(f"This this note can't be saved", file = os.stderr)
         return
     if len(seenNames)< len(map):
-        print(f"""The following fields are in the model {getModelFromNote(lastNote)["name"]}, but not used in it's note {lastNid}:""", file = sys.stderr)
+        print(f"""The following fields are in the model {getModelFromNote(note)["name"]}, but not used in it's note {nid}:""", file = sys.stderr)
         for key in map:
             if key not in seenNames:
                 print(key, file = sys.stderr)
         debug(f"""Their previous value were kept.""", file = sys.stderr)
         return
-    lastNote.flush()
+    note.flush()
 
-def getNote(nid):
-    global lastNid, lastNote, seenNames
-    if nid != lastNid:
-        endGroup()
-        lastNid = nid
-        lastNote = mw.col.getNote(nid)
-        seenNames = dict()
-    return lastNote
-
-def oneLine(line):
+def oneLine(line, lastNid, note, seenNames):
     """Python error while loading note if the nid does not exists"""
     nid,name,value = line
-    note = getNote(nid)
+    if nid != lastNid:
+        note = mw.col.getNote(nid)
+        seenNames = dict()
     model = getModelFromNote(note)
     map = getMap(note)
     if name not in map:
@@ -67,13 +55,16 @@ def oneLine(line):
         return
     seenNames[name] = value
     ord,_ = map.get(name)
-    lastNote.fields[ord]=value
-    return note
+    note.fields[ord]=value
+    return nid,note,seenNames
 
 def allLines(lines):
+    nid = None
+    note = None
+    seenNames = dict()
     for line in lines:
-        oneLine(line)
-    endGroup()
+        nid,note,seenNames = oneLine(line, nid, note, seenNames)
+    endGroup(nid,note,seenNames)
 
 def getRows():
     nids = mw.col.findNotes("")

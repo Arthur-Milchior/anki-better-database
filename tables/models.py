@@ -29,7 +29,7 @@ def getTemplates(id):
     return []
 
 def oneLine(line):
-    json, css, deckName, id, latexPost, latexPre, mod, name, req, sortf, tags, nb_tmpls, nb_fields, type, usn, vers = line
+    json_, css, deckName, id, latexPost, latexPre, mod, name, req, sortf, tags, nb_tmpls, nb_fields, type, usn, vers = line
     oldModel = mw.col.models.get(id)
     templates = oldModel["tmpls"]
     fields = oldModel["flds"]
