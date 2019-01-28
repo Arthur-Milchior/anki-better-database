@@ -84,7 +84,7 @@ def getRows():
             configuration["rev"]["minSpace"],
             configuration["rev"]["ivlFct"],
             configuration["rev"]["maxIvl"],
-            configuration["rev"]["bury"],
+            configuration["rev"].get("bury",True),
            )
 
 def oneLine(line):

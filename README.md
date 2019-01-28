@@ -108,7 +108,7 @@ the decks default configuration, deleting the tables is pretty
 useless. It only free spaces on your disk. You can use empty table to
 add contents using either another program or just a database
 editor. You can then port this content into anki using the action
-"rebuild".
+"Readable to anki".
 
 ### Database constraints
 The tables are created with constraints which should make sens if it
