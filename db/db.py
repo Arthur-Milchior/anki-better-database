@@ -1,56 +1,18 @@
 from aqt import mw
-from .config import considerTable, getDb, isTableInSameDb
-from .utils import *
-from .config import *
-from .debug import *
+from .columns import *
+from ..config import getDb, isTableInSameDb
+from ..utils import *
+from ..config import *
+from ..debug import *
 
 
-
-class Reference:
-    def __init__(self, table, column, onDelete = None, update = None):
-        self.table = table
-        self.column = column
-        self.onDelete = onDelete
-        self.update = update
-
-    def create_query(self):
-        if not considerTable(self.table):
-            return ""
-        t = f"references {self.table} ({self.column})"
-        if self.onDelete:
-            t+= f" on Delete {self.onDelete}"
-        if self.update:
-            t+= f" on update {self.update}"
-        return t
-
-setNull = "set null"
-cascade = "cascade"
-class Column:
-    def __init__(self, name, type = None, reference = None, unique = None, primary = None, notNull = None):
-        self.name = name
-        self.type = type
-        self.reference = reference
-        self.unique = unique
-        self.notNull = notNull
-        self.primary = primary
-
-    def create_query(self):
-        t = self.name
-        if self.type:
-            t += f" {self.type}"
-        if self.unique:
-            t += f" unique"
-        if self.reference:
-            t += f" "+self.reference.create_query()
-        if self.primary:
-            t+= f" primary key"
-        if self.notNull:
-            t+= f" Not null"
-        return t
 
 class Table:
-    def __init__(self, name, columns, getRows, rebuild, uniques = None, order = None):
+    def __init__(self, name, columns, getRows, rebuild, uniques = None, order = None, equalities=None, joins = None, viewColumns = None):
         self.name = name
+        self.equalities = equalities
+        self.joins = joins
+        self.viewColumns = viewColumns
         if uniques and isinstance(uniques[0], str):
             uniques = [uniques]
         self.uniques = uniques
@@ -67,10 +29,35 @@ class Table:
 
     def rebuild(self):
         self.rebuildFun(self.select())
-        if not keepTable():
-            self.delete()
 
+    def table_exists(self):
+        return getDb().all("SELECT name FROM sqlite_master WHERE type='table' AND name='?';", self.name)
 
+    def view_query(self):
+        t= f"CREATE view "
+        #t+=" if not exists "
+        t+=f" full{self.name} ("
+        t+=commaJoin(self.columns, (lambda column:column.name))
+        t+=", "
+        t+= commaJoin(self.viewColumns, (lambda x:x[0]))
+        t+=") as select "
+        t+=commaJoin(self.columns, (lambda column:f"{self.name}.{column.name}"))
+        t+=", "
+        t+=commaJoin(self.viewColumns, (lambda x:x[1]))
+        t+=f" from {self.name} "
+        for join in self.joins:
+            t+= f" inner join {join} "
+        t+=" on "
+        t+=" and ".join(self.equalities)
+        t+=";"
+        print(t)
+        return t
+
+    def view(self):
+        if self.viewColumns:
+            getDb().execute(self.view_query())
+            
+        
     def create_query(self):
         t = f"CREATE table if not exists {self.name} ("
         t+=commaJoin(self.columns, (lambda column:column.create_query()))
@@ -120,28 +107,46 @@ class Table:
         getDb().execute(self.delete_query())
 
     def empty(self):
-        for query in self.empty_queries():
-            getDb().execute(query)
+        if self.table_exists():
+            for query in self.empty_queries():
+                getDb().execute(query)
 
     def clarify(self):
-        if not considerTable(self.name):
-            return
         self.delete()
         self.create()
         self.insert(self.getRows())
         getDb().commit()
 
-    def select_query(self):
+    def select_all_query(self, condition=""):
         t = "select "
         first = True
         t+= commaJoin(self.columns, (lambda column:column.name))
-        t+=f" from {self.name}"
+        if self.viewColumns:
+            t+=", "
+            t+=commaJoin(self.viewColumns, (lambda x:x[0]))
+        t+=" from "
+        if self.joins:
+            t+=f"full_{self.name}"
+        else:
+            t+=self.name
         if self.order:
             t+= " order by "
             t+= commaJoin(self.order)
+        t+= condition
         t+=" ;"
         debug(t)
         return t
 
-    def select(self):
-        return getDb().all(self.select_query())
+    def select(self,condition="", *args,**kwargs):
+        query = self.select_all_query(condition, *args,**kwargs)
+        return getDb().all(query)
+
+    def scalar(self, column, condition= "", *args,**kwargs):
+        query = f"Select {column} from {self.name} {condition}"
+        return getDb().scalar(query, *args,**kwargs)
+                
+    def first(self, condition= "", *args,**kwargs):
+        query = self.select_all_query(condition, *args,**kwargs)
+        return getDb().first(query, *args,**kwargs)
+                
+

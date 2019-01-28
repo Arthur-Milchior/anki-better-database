@@ -1,5 +1,6 @@
+from ..db.db import *
+from ..db.columns import *
 from ..debug import *
-from ..db import *
 import json
 from aqt import mw
 name="decks"

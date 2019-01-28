@@ -1,0 +1,4 @@
+select fields.nid, fields.name, fields.value, fieldnames.ord
+from fields
+inner join fieldnames on fields.name = fieldnames.name
+inner join notes on notes.id = fields.nid and notes.model = fieldnames.model

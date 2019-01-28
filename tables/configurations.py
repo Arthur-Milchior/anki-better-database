@@ -1,4 +1,5 @@
-from ..db import *
+from ..db.db import *
+from ..db.columns import *
 from ..debug import *
 import json
 from ..config import *
@@ -69,7 +70,7 @@ def getRows():
             configuration["new"]["separate"],
             int(configuration["new"]["order"])==0,
             configuration["new"]["perDay"],
-            configuration["new"]["bury"],
+            configuration["new"].get("bury",True),
 
             json.dumps(configuration["lapse"]["delays"]),
             configuration["lapse"]["mult"],

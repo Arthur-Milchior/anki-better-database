@@ -1,5 +1,6 @@
 from aqt import mw
-from ..db import *
+from ..db.db import *
+from ..db.columns import *
 from ..config import *
 
 name= "tags"

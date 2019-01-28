@@ -35,7 +35,7 @@ assume you keep the default configurations. Each options (configurable
 using the add-on manager) are explained in the next section.
 
 ### Create the readable back
-In the main window, choose "create the readable tables" to obtain the
+In the main window, choose "Anki to readable" to obtain the
 readable tables. Those tables are created in a database in
 the add-on folder.  You'll obtain a sqlite database in the add-on
 folder. If you don't know how to access this folder, open the add-on
@@ -70,7 +70,7 @@ is changed so that it reflects the meaning of the truth value of the Boolean.
 ### Rebuild your database
 Let us assume you have edit the readable database. You may want to
 port those change to anki's database. To do this, in the main window,
-choose "rebuild database". Most of the contents of the readable
+choose "Readable to anki". Most of the contents of the readable
 database will be ported to anki database. The only data from the
 readable database not ported to anki's database is:
 * the column name ```json```.
@@ -95,13 +95,20 @@ you did edit it. In this case, the note can't be rebuild.
 If the rebuilding was done properly, the table will be dropped from
 the readable database.
 
+#### You can't rebuild __Notes and cards__
+Currently, you can't rebuild anything from those tables. Sorry, but
+it's kinda more complicated, and I have yet to decide how to check
+whether two cards are the same. Either by cid, or by (nid, ord). And
+you need to merge fields in order to make a total note.
+
 ### Empty or delete the new tables
 You can destroy or deleted the new tables by clicking the button
-"delete the new tables" and "empty readable tables". While you keep the
-decks default configuration, deleting the tables is pretty useless. It
-only free spaces on your disk. You can use empty table to add contents
-using either another program or just a database editor. You can then
-port this content into anki using the action "rebuild".
+"Delete readable tables" and "Empty readable tables". While you keep
+the decks default configuration, deleting the tables is pretty
+useless. It only free spaces on your disk. You can use empty table to
+add contents using either another program or just a database
+editor. You can then port this content into anki using the action
+"rebuild".
 
 ### Database constraints
 The tables are created with constraints which should make sens if it
@@ -131,6 +138,7 @@ database.
 
 ### Add the tables in anki's database.
 
+__THIS OPTION IS CURRENTLY REMOVED__
 By default, the the new tables are created in a new database. You can
 decide to create the new tables in anki's database instead. In order
 to do this, set "use anki's database" to true in the add-on's

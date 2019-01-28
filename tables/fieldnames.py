@@ -1,4 +1,5 @@
-from ..db import *
+from ..db.db import *
+from ..db.columns import *
 from ..debug import *
 from aqt import mw
 import json
@@ -95,3 +96,8 @@ def getRows():
                 field["size"])
 
 table = Table(name, columns, getRows, allLines, uniques = [["ord","model"],["name","model"],], order = ["model","ord"])
+
+def getFieldOrd(name,modelName):
+    condition = " where name = ? and model = ?"
+    return table.scalar("ord", condition, name, modelName)
+    

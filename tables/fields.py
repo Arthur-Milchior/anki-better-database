@@ -1,6 +1,7 @@
+from ..db.db import *
+from ..db.columns import *
 from ..debug import *
 from aqt import mw
-from ..db import *
 import sys
 import os
 
@@ -77,4 +78,8 @@ def getRows():
             value = note.fields[ord]
             name = fieldNames[ord]
             yield (nid,name, value)
+            
 table = Table(name, columns, getRows, allLines, uniques = ["name","nid"], order = ["nid"])
+
+def getField(nid,name):
+    return table.scalar("value", " where name = ? and nid = ?", name,nid, equalities = ["fields.name = fieldnames.name", "notes.model = fieldnames.model"], viewColumns = [("ord","fieldnames.ord")], joins = ["fieldnames", "notes"])

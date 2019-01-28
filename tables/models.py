@@ -1,4 +1,5 @@
-from ..db import *
+from ..db.db import *
+from ..db.columns import *
 from aqt import mw
 import json
 
@@ -66,6 +67,7 @@ def allLines(lines):
     mw.col.models.changed = True
     mw.col.models.flush()
 
+    
 def getRows():
     models = mw.col.models.models
     for model in models.values():
@@ -94,3 +96,7 @@ def getRows():
         except:
             raise
 table = Table(name, columns, getRows, allLines)
+def getModel(name):
+    condition = """ where name = ?"""
+    return table.first(name)
+

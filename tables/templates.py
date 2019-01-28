@@ -1,10 +1,11 @@
-from ..db import *
+from ..db.db import *
+from ..db.columns import *
 from aqt import mw
 from ..debug import *
 import sys
 import json
 
-name= "template"
+name= "templates"
 columns = [
     Column(name="json", type="TEXT"),
     Column(name="model",type="text", reference= Reference("models", "name",  onDelete = cascade, update = cascade)),

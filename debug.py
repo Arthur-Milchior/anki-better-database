@@ -1,6 +1,8 @@
+doDebug = True
 def debug(s):
     # if file:
     #     print(s, file=file)
     # else:
-    print(s)
+    if doDebug:
+        print(s)
     pass

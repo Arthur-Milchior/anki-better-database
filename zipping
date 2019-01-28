@@ -1,1 +1,1 @@
-zip -r database.zip config.* *py README.md LICENSE tables	zipping
+zip -r database.zip config.* *py README.md LICENSE tables db zipping
