@@ -1,4 +1,3 @@
-import aqt
 from .debug import *
 from aqt import mw
 import os
@@ -20,7 +19,7 @@ userOption = None
 def getUserOption():
     global userOption
     if userOption is None:
-        userOption = aqt.mw.addonManager.getConfig(__name__)
+        userOption = mw.addonManager.getConfig(__name__)
     return userOption
 
 def update(_):

@@ -3,6 +3,7 @@ from ..db.columns import *
 from aqt import mw
 import json
 from anki.find import Finder
+import sys
 
 name= "cards"
 columns=[
@@ -73,7 +74,12 @@ def getRows():
         deckName = deck["name"]
         note = card.note()
         model = note._model
-        template = model["tmpls"][card.ord]
+        modelName = model["name"]
+        try:
+            template = model["tmpls"][card.ord]
+        except IndexError:
+            print(f"""Card {cid} has ord {card.ord} and model {modelName}, which have only {len(model["tmpls"])} cards.""",file=sys.stderr)
+            continue
         templateName = template["name"]
         try:
             yield (
