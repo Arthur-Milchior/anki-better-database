@@ -105,3 +105,4 @@ venv.bak/
 *~
 *zip
 *sqlite3
+/clearer.None.sqlite3-journal

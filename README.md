@@ -56,8 +56,8 @@ of anki database.
   in any edit windows.
 * decks.
 
-All tables except ```fields``` and ```tags``` have a column
-called ```json```. This column contains the ```json``` of the object,
+All tables except `fields` and `tags` have a column
+called `json`. This column contains the `json` of the object,
 as in anki's database. This is not really readable, but may still be
 useful.
 
@@ -73,8 +73,8 @@ port those change to anki's database. To do this, in the main window,
 choose "Readable to anki". Most of the contents of the readable
 database will be ported to anki database. The only data from the
 readable database not ported to anki's database is:
-* the column name ```json```.
-* in the table models, the column ```nb_tmpls``` and ```nb_fields```.
+* the column name `json`.
+* in the table models, the column `nb_tmpls` and `nb_fields`.
 
 In general content is edited or added. If you delete a tag, a deck, a
 model or a field from the readable database, it will not be deleted
@@ -113,12 +113,12 @@ editor. You can then port this content into anki using the action
 ### Database constraints
 The tables are created with constraints which should make sens if it
 was a database used in a real program. Thus, the id of each table is
-unique. For example, in the table fieldnames, the pair ```(ord,
-mid)``` is unique. Furthermore, ```mid``` is a reference to the table
+unique. For example, in the table fieldnames, the pair `(ord,
+mid)` is unique. Furthermore, `mid` is a reference to the table
 model's column id.
 
 Cascading in case of update/deletion is set to what makes sens to
-me. In the previous example, if the ```id``` is changed in a model,
+me. In the previous example, if the `id` is changed in a model,
 then it is chagend in the fieldname. If the model is deleted, the
 fieldname of this id is also deleted.
 
@@ -131,7 +131,7 @@ you don't want it to be considered in any actions.
 
 
 The "references constraints" are added only when it is a reference to
-a table in this database. In the table fieldnames, ```mid``` is a a
+a table in this database. In the table fieldnames, `mid` is a a
 reference to the table models if this table in added in the readable
 database.
 
@@ -154,7 +154,7 @@ database constraint.
 ### Deleting entries from the database
 By default, if you did delete a line in the readable database, the
 deletion won't be ported to anki database. You can choose to alter
-this behavior in the configuration by setting the ```deletion``` to
+this behavior in the configuration by setting the `deletion` to
 true.
 
 A few note related to what will happen if we delete an entry, for each
