@@ -1,1 +1,2 @@
-zip -r database.zip config.* *py README.md LICENSE tables db zipping
+rm database.zip
+zip -r database.zip config.* *py README.md LICENSE tables db zipping ankiweb
